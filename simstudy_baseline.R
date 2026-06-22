@@ -12,7 +12,7 @@ source("fuzzy_clust_algs.R")
 DATA_DIR <- "data"
 RESULT_DIR <- "results"
 LOG_DIR <- "logs"
-AGG_FILE <- "agg.rds"
+AGG_FILE <- paste0(RESULT_DIR, "/agg.rds")
 
 OUT <- list(
   fcmmk = file.path(RESULT_DIR, "baseline_fcmmk_res"),
