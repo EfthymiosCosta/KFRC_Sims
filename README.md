@@ -2,7 +2,7 @@
 
 This Github repository includes the associated code to reproduce the results of the paper "Spectrally Tuned Bandwidth Selection for Kernel Fuzzy Relational Clustering" by Costa E. & Thompson J. (2026). The repository is organised as follows:
 
-* `real_data`: This directory includes the IS, diabetes, rice, and vehicle data sets as .rds files.
+* `real_data`: This directory includes the IS, diabetes, rice, and vehicle data sets as `.rds` files.
 * `results`: This directory includes the results of the simulation studies conducted on both synthetically generated and publicly available data sets. More precisely:
   * `agg_seedxx.rds`: These files include the aggregated results of KFRC on the synthetically generated data sets, with `xx` corresponding to the seed number used to generate the data sets.
   * `agg.rds`: Combined results of all `agg_seedxx.rds` results files.
