@@ -52,3 +52,20 @@ weff_df <- do.call(rbind, results)
 saveRDS(weff_df, "results/weff_df.rds")
 cat("Saved", nrow(weff_df), "rows total across",
     length(unique(weff_df$seed)), "seeds\n")
+
+# Lower bound on W_eff as function of alpha for different dimensions p
+library(ggplot2)
+weff_bound <- function(alpha, p) {
+  k <- 1:(p - 1)
+  min((k * alpha + p - k)^2 / (k * alpha^2 + p - k))
+}
+grid <- expand.grid(alpha = exp(seq(0, log(1000), length.out = 400)), p = c(2, 5, 10, 20, 50))
+grid$bound <- mapply(weff_bound, grid$alpha, grid$p)
+pts <- expand.grid(alpha = c(1, 5, 10, 25, 50), p = c(2, 5, 10, 20, 50))
+pts$bound <- mapply(weff_bound, pts$alpha, pts$p)
+ggplot(grid, aes(x = alpha, y = bound, colour = factor(p))) +
+  geom_line() +
+  geom_point(data = pts) +
+  scale_x_log10() +
+  labs(x = expression(alpha), y = expression("Lower bound on " * W[eff]), colour = expression(p)) +
+  theme_bw()

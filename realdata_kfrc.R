@@ -114,14 +114,14 @@ run_kfrc <- function(d, fuzzifier, criterion, alpha) {
 
   set.seed(123)
   sel <- tryCatch(
-    select_bandwidth2(X, c = K,
-                      tau = tau,
-                      alpha = alpha,
-                      kernel = "sum",
-                      criterion = criterion,
-                      n_starts = 10,
-                      max_iter = 500,
-                      verbose = FALSE),
+    select_bandwidth(X, c = K,
+                     tau = tau,
+                     alpha = alpha,
+                     kernel = "sum",
+                     criterion = criterion,
+                     n_starts = 10,
+                     max_iter = 500,
+                     verbose = FALSE),
     error = function(e) list(feasible = FALSE,
                              error = conditionMessage(e))
   )

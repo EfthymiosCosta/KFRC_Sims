@@ -2,7 +2,7 @@ library(ggplot2)
 library(kernlab)
 library(RColorBrewer)
 library(gridExtra)
-source("simstudy_src_upd.R")
+source("simstudy_src.R")
 
 `%||%` <- function(a, b) if (!is.null(a)) a else b
 
@@ -173,3 +173,46 @@ for (ds_name in DATASETS_TO_PLOT) {
 }
 
 grid.arrange(grobs = plots, ncol = 3)
+
+# Distribution of FARI_crisp of KFRC on real datasets with points shaded by alpha values
+# Performance of competitors is also plotted as horizontal dashed lines
+realdata_baselines_agg <- readRDS("results/realdata_baselines_agg.rds")
+realdata_kfrc_agg <- readRDS("results/realdata_kfrc_agg.rds")
+
+lev <- c("diabetes", "rice", "seeds", "vehicle", "wine", "IS")
+lab <- c("Diabetes", "Rice", "Seeds", "Vehicle", "Wine", "Image Segmentation")
+fz_lev <- c("power", "exp", "quad", "crt")
+fz_lab <- c("Power", "Exponential", "Quadratic", "Comp. root")
+
+kf <- realdata_kfrc_agg
+kf$dataset <- factor(kf$dataset, levels = lev, labels = lab)
+kf$fuzzifier <- factor(kf$fuzzifier, levels = fz_lev, labels = fz_lab)
+feas_bench <- aggregate(feasible ~ dataset + fuzzifier, data = kf, FUN = mean)
+bl <- realdata_baselines_agg
+bl$dataset <- factor(bl$dataset, levels = lev, labels = lab)
+bl$label <- ifelse(grepl("^FANNY", bl$method), paste0("FANNY (", tools::toTitleCase(bl$metric), ")"), bl$method)
+frc <- bl[grepl("^FRC", bl$method), ]
+frc$fuzzifier <- ifelse(is.na(frc$fuzzifier), sub("^FRC_", "", frc$method), frc$fuzzifier)
+frc$fuzzifier <- factor(frc$fuzzifier, levels = fz_lev, labels = fz_lab)
+oth <- bl[!grepl("^FRC", bl$method), ]
+box_bench <- function(metric) {
+  ylab <- switch(metric, FARI_crisp = expression(FARI[crisp]), uniformity = "U", metric)
+  ggplot(kf, aes(x = fuzzifier, y = .data[[metric]])) +
+    geom_boxplot(outlier.size = 0.5, fill = 'khaki', outlier.shape = NA) +
+    geom_hline(data = oth, aes(yintercept = .data[[metric]], colour = label), linetype = "dashed") +
+    geom_errorbar(data = frc, aes(ymin = .data[[metric]], ymax = .data[[metric]], linetype = "FRC"),
+                  colour = "red", width = 0.8, linewidth = 0.8) +
+    scale_linetype_manual(values = "solid") +
+    facet_wrap(~ dataset, nrow = 2, scales = "free_y") +
+    geom_point(aes(fill = factor(alpha), group = factor(alpha)), shape = 21, size = 2,
+               position = position_dodge(width = 0.6)) +
+    scale_fill_brewer(palette = "Blues") +
+    labs(x = NULL, y = ylab, colour = NULL, linetype = NULL,
+         fill = expression(alpha)) +
+    guides(colour = guide_legend(order = 1),
+           linetype = guide_legend(order = 2),
+           fill = guide_legend(order = 3)) +
+    theme_bw() +
+    theme(legend.position = "bottom")
+}
+box_bench("FARI_crisp")
